@@ -4,5 +4,5 @@
 namespace ApiAuthorization.IdentityServer.Configuration;
 
 internal class ResourceDefinition : ServiceDefinition {
-    public string Scopes { get; set; }
+    public string? Scopes { get; set; }
 }

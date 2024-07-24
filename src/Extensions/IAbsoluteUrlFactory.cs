@@ -6,6 +6,6 @@ using Microsoft.AspNetCore.Http;
 namespace ApiAuthorization.IdentityServer.Extensions;
 
 internal interface IAbsoluteUrlFactory {
-    string GetAbsoluteUrl(string path);
-    string GetAbsoluteUrl(HttpContext context, string path);
+    string? GetAbsoluteUrl(string path);
+    string? GetAbsoluteUrl(HttpContext context, string path);
 }

@@ -1,9 +1,6 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using ApiAuthorization.IdentityServer.Configuration;
 using ApiAuthorization.IdentityServer.Extensions;
 using ApiAuthorization.IdentityServer.Options;
@@ -58,9 +55,7 @@ public static class IdentityServerBuilderConfigurationExtensions {
         Action<ApiAuthorizationOptions> configure)
         where TUser : class
         where TContext : DbContext, IPersistedGrantDbContext {
-        if (configure == null) {
-            throw new ArgumentNullException(nameof(configure));
-        }
+        ArgumentNullException.ThrowIfNull(configure);
 
         builder.AddAspNetIdentity<TUser>()
             .AddOperationalStore<TContext>()
@@ -92,7 +87,7 @@ public static class IdentityServerBuilderConfigurationExtensions {
     /// <returns>The <see cref="IIdentityServerBuilder" />.</returns>
     public static IIdentityServerBuilder AddApiResources(
         this IIdentityServerBuilder builder,
-        IConfiguration configuration) {
+        IConfiguration? configuration) {
         builder.ConfigureReplacedServices();
         builder.AddApiScopes();
         builder.AddInMemoryApiResources([]);
@@ -132,7 +127,7 @@ public static class IdentityServerBuilderConfigurationExtensions {
     /// <returns>The <see cref="IIdentityServerBuilder" />.</returns>
     public static IIdentityServerBuilder AddClients(
         this IIdentityServerBuilder builder,
-        IConfiguration configuration) {
+        IConfiguration? configuration) {
         builder.ConfigureReplacedServices();
         builder.AddInMemoryClients(Enumerable.Empty<Client>());
 
@@ -173,7 +168,7 @@ public static class IdentityServerBuilderConfigurationExtensions {
     /// <returns>The <see cref="IIdentityServerBuilder" />.</returns>
     public static IIdentityServerBuilder AddIdentityResources(
         this IIdentityServerBuilder builder,
-        IConfiguration configuration) {
+        IConfiguration? configuration) {
         builder.ConfigureReplacedServices();
         builder.AddInMemoryIdentityResources([]);
         builder.Services.TryAddEnumerable(
@@ -210,7 +205,7 @@ public static class IdentityServerBuilderConfigurationExtensions {
     /// <returns>The <see cref="IIdentityServerBuilder" />.</returns>
     public static IIdentityServerBuilder AddSigningCredentials(
         this IIdentityServerBuilder builder,
-        IConfiguration configuration) {
+        IConfiguration? configuration) {
         const string keySectionName = "IdentityServer:Key";
 
         builder.ConfigureReplacedServices();
@@ -231,19 +226,15 @@ public static class IdentityServerBuilderConfigurationExtensions {
         // We take over the setup for the validation keys store as Identity Server registers a singleton
         builder.Services.AddSingleton<IValidationKeysStore>(sp => {
             var options = sp.GetRequiredService<IOptions<ApiAuthorizationOptions>>();
-            var signingCredential = options.Value.SigningCredential;
-
-            if (signingCredential is null) {
-                throw new InvalidOperationException(
-                    $"No signing credential is configured by the '{keySectionName}' configuration section.");
-            }
-
-            return new InMemoryValidationKeysStore(new[] {
+            var signingCredential = options.Value.SigningCredential
+                                    ?? throw new InvalidOperationException(
+                                        $"No signing credential is configured by the '{keySectionName}' configuration section.");
+            return new InMemoryValidationKeysStore([
                 new SecurityKeyInfo {
                     Key = signingCredential.Key,
                     SigningAlgorithm = signingCredential.Algorithm,
                 },
-            });
+            ]);
         });
 
         return builder;

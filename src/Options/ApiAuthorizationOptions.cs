@@ -47,5 +47,5 @@ public class ApiAuthorizationOptions {
     /// <summary>
     ///     Gets or sets the <see cref="SigningCredentials" /> to use for signing tokens.
     /// </summary>
-    public SigningCredentials SigningCredential { get; set; }
+    public SigningCredentials? SigningCredential { get; set; }
 }

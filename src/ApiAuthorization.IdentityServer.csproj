@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
-    <Description>ASP.NET Core API Authorization package powered by Identity Server.</Description>
+    <Description>ASP.NET Core API Authorization package powered by Identity Server (Supports IdentityServer 7).</Description>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <PackageTags>aspnetcore;apiauth;identity</PackageTags>
     <!-- We are a package that depends on the shared framework, this allows us to
@@ -10,14 +10,18 @@
     <GenerateErrorForMissingTargetingPacks>false</GenerateErrorForMissingTargetingPacks>
     <!-- IdentityServer packages are not strong named -->
     <NoWarn>$(NoWarn);CS8002</NoWarn>
-    <Nullable>disable</Nullable>
-    <Title>ASP.NET Core API Authorization package powered by Identity Server.</Title>
+    <Nullable>enable</Nullable>
+    <Title>ASP.NET Core API Authorization package powered by Identity Server (Supports IdentityServer 7).</Title>
     <Authors>aviad</Authors>
     <PackageProjectUrl>https://github.com/paviad/apiauthorization-identityserver</PackageProjectUrl>
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <RepositoryUrl>https://github.com/paviad/apiauthorization-identityserver</RepositoryUrl>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <UserSecretsId>284feb1e-ae8e-4e78-ad41-f56ff2b128e8</UserSecretsId>
+    <AssemblyVersion>$(AssemblyVersion)</AssemblyVersion>
+    <FileVersion>$(FileVersion)</FileVersion>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Version>1.1.0</Version>
   </PropertyGroup>
 
   <ItemGroup>
@@ -31,11 +35,9 @@
     <PackageReference Include="Duende.IdentityServer" Version="7.0.5" />
     <PackageReference Include="Duende.IdentityServer.AspNetIdentity" Version="7.0.5" />
     <PackageReference Include="Duende.IdentityServer.EntityFramework" Version="7.0.5" />
-    <PackageReference Include="JetBrains.Annotations" Version="2024.2.0" />
+    <PackageReference Include="JetBrains.Annotations" Version="2024.2.0" PrivateAssets="all" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.7" />
     <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="8.0.7" />
-    <PackageReference Include="Microsoft.Extensions.Configuration.UserSecrets" Version="6.0.1" />
-    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
   </ItemGroup>
 
 </Project>

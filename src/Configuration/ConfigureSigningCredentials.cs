@@ -1,9 +1,6 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
-using System;
-using System.IO;
-using System.Linq;
 using System.Security.Cryptography.X509Certificates;
 using ApiAuthorization.IdentityServer.Options;
 using Microsoft.Extensions.Configuration;
@@ -30,7 +27,7 @@ internal sealed class ConfigureSigningCredentials(
         }
     }
 
-    public SigningCredentials LoadKey() {
+    public SigningCredentials? LoadKey() {
         // We can't know for sure if there was a configuration section explicitly defined.
         // Check if the current configuration has any children and avoid failing if that's the case.
         // This will avoid failing when no configuration has been specified but will still fail if partial data
@@ -66,13 +63,17 @@ internal sealed class ConfigureSigningCredentials(
                     };
                 return new SigningCredentials(developmentKey, "RS256");
             case KeySources.File:
-                var pfxPath = Path.Combine(Directory.GetCurrentDirectory(), key.FilePath);
+                var pfxPath = Path.Combine(Directory.GetCurrentDirectory(),
+                    key.FilePath ?? throw new InvalidOperationException("FilePath must be specified for File source"));
                 var storageFlags = GetStorageFlags(key);
                 logger.LogInformation(LoggerEventIds.CertificateLoadedFromFile,
                     "Loading certificate file at '{CertificatePath}' with storage flags '{CertificateStorageFlags}'.",
                     pfxPath, key.StorageFlags);
                 return new SigningCredentials(
-                    new X509SecurityKey(SigningKeysLoader.LoadFromFile(pfxPath, key.Password, storageFlags)), "RS256");
+                    new X509SecurityKey(SigningKeysLoader.LoadFromFile(pfxPath,
+                        key.Password ??
+                        throw new InvalidOperationException("Password must be specified for File source"),
+                        storageFlags)), "RS256");
             case KeySources.Store:
                 if (!Enum.TryParse<StoreLocation>(key.StoreLocation, out var storeLocation)) {
                     throw new InvalidOperationException($"Invalid certificate store location '{key.StoreLocation}'.");
@@ -82,7 +83,11 @@ internal sealed class ConfigureSigningCredentials(
                     "Loading certificate with subject '{CertificateSubject}' in '{CertificateStoreLocation}\\{CertificateStoreName}'.",
                     key.Name, key.StoreLocation, key.StoreName);
                 return new SigningCredentials(
-                    new X509SecurityKey(SigningKeysLoader.LoadFromStoreCert(key.Name, key.StoreName, storeLocation,
+                    new X509SecurityKey(SigningKeysLoader.LoadFromStoreCert(
+                        key.Name ?? throw new InvalidOperationException("Name must be specified for Store source"),
+                        key.StoreName ??
+                        throw new InvalidOperationException("StoreName must be specified for Store source"),
+                        storeLocation,
                         GetCurrentTime())), "RS256");
             default:
                 throw new InvalidOperationException($"Invalid key type '{key.Type ?? "(null)"}'.");

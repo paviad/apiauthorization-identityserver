@@ -1,7 +1,6 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
-using System.Collections.Generic;
 using Microsoft.AspNetCore.Http;
 
 namespace ApiAuthorization.IdentityServer.Extensions;
@@ -16,5 +15,5 @@ public interface IClientRequestParametersProvider {
     /// <param name="context">The current <see cref="HttpContext" />.</param>
     /// <param name="clientId">The client id for the client.</param>
     /// <returns>A <see cref="IDictionary{TKey, TValue}" /> containing the client parameters and their values.</returns>
-    IDictionary<string, string> GetClientParameters(HttpContext context, string clientId);
+    IDictionary<string, string?> GetClientParameters(HttpContext context, string? clientId);
 }

@@ -1,7 +1,6 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
-using System;
 using Microsoft.AspNetCore.Http;
 
 namespace ApiAuthorization.IdentityServer.Extensions;
@@ -12,7 +11,7 @@ internal sealed class AbsoluteUrlFactory(IHttpContextAccessor httpContextAccesso
     public IHttpContextAccessor ContextAccessor { get; } = httpContextAccessor;
 
     // Call this method when you are overriding a service that doesn't have an HttpContext instance available.
-    public string GetAbsoluteUrl(string path) {
+    public string? GetAbsoluteUrl(string path) {
         var (process, result) = ShouldProcessPath(path);
         if (!process) {
             return result;
@@ -27,7 +26,7 @@ internal sealed class AbsoluteUrlFactory(IHttpContextAccessor httpContextAccesso
     }
 
     // Call this method when you are implementing a service that has an HttpContext instance available.
-    public string GetAbsoluteUrl(HttpContext context, string path) {
+    public string? GetAbsoluteUrl(HttpContext context, string path) {
         var (process, result) = ShouldProcessPath(path);
         if (!process) {
             return result;
@@ -37,7 +36,7 @@ internal sealed class AbsoluteUrlFactory(IHttpContextAccessor httpContextAccesso
         return $"{request.Scheme}://{request.Host.ToUriComponent()}{request.PathBase.ToUriComponent()}{path}";
     }
 
-    private static (bool, string) ShouldProcessPath(string path) {
+    private static (bool, string?) ShouldProcessPath(string? path) {
         if (path == null || !Uri.IsWellFormedUriString(path, UriKind.RelativeOrAbsolute)) {
             return (false, null);
         }

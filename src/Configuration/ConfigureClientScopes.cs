@@ -1,8 +1,6 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
-using System;
-using System.Linq;
 using ApiAuthorization.IdentityServer.Options;
 using Duende.IdentityServer.Models;
 using Microsoft.Extensions.Logging;
@@ -14,7 +12,7 @@ internal sealed class ConfigureClientScopes(ILogger<ConfigureClientScopes> logge
     : IPostConfigureOptions<ApiAuthorizationOptions> {
     private const char DefaultClientListSeparator = ' ';
 
-    public void PostConfigure(string name, ApiAuthorizationOptions options) {
+    public void PostConfigure(string? name, ApiAuthorizationOptions options) {
         AddApiResourceScopesToClients(options);
         AddIdentityResourceScopesToClients(options);
     }

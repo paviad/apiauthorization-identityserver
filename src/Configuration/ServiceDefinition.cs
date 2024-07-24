@@ -4,5 +4,5 @@
 namespace ApiAuthorization.IdentityServer.Configuration;
 
 internal class ServiceDefinition {
-    public string Profile { get; init; }
+    public string? Profile { get; init; }
 }

@@ -8,7 +8,7 @@ using Microsoft.Extensions.Options;
 namespace ApiAuthorization.IdentityServer.Configuration;
 
 internal sealed class ConfigureApiScopes : IPostConfigureOptions<ApiAuthorizationOptions> {
-    public void PostConfigure(string name, ApiAuthorizationOptions options) {
+    public void PostConfigure(string? name, ApiAuthorizationOptions options) {
         AddResourceScopesToApiScopes(options);
     }
 

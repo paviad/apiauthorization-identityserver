@@ -1,12 +1,9 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
-using System;
-using System.IO;
-using System.Linq;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
-using Newtonsoft.Json;
+using System.Text.Json;
 
 namespace ApiAuthorization.IdentityServer.Configuration;
 
@@ -19,17 +16,19 @@ internal static class SigningKeysLoader {
         }
 
         if (fileExists) {
-            var rsa = JsonConvert.DeserializeObject<RsaKeyParameters>(File.ReadAllText(path));
+            var rsa = JsonSerializer.Deserialize<RsaKeyParameters>(File.ReadAllText(path)) ??
+                      throw new InvalidOperationException(
+                          $"{path} could not be deserialized to {nameof(RsaKeyParameters)}");
             return rsa.GetRsa();
         }
 
         var parameters = RsaKeyParameters.Create();
         var directory = Path.GetDirectoryName(path);
         if (!Directory.Exists(directory)) {
-            Directory.CreateDirectory(directory);
+            Directory.CreateDirectory(directory!);
         }
 
-        File.WriteAllText(path, JsonConvert.SerializeObject(parameters));
+        File.WriteAllText(path, JsonSerializer.Serialize(parameters));
         return parameters.GetRsa();
     }
 
@@ -60,67 +59,65 @@ internal static class SigningKeysLoader {
         string storeName,
         StoreLocation storeLocation,
         DateTimeOffset currentTime) {
-        using (var store = new X509Store(storeName, storeLocation)) {
-            X509Certificate2Collection storeCertificates = null;
-            X509Certificate2 foundCertificate = null;
+        using var store = new X509Store(storeName, storeLocation);
+        X509Certificate2Collection? storeCertificates = null;
+        X509Certificate2? foundCertificate = null;
 
-            try {
-                store.Open(OpenFlags.ReadOnly);
-                storeCertificates = store.Certificates;
-                var foundCertificates = storeCertificates
-                    .Find(X509FindType.FindBySubjectDistinguishedName, subject, validOnly: false);
+        try {
+            store.Open(OpenFlags.ReadOnly);
+            storeCertificates = store.Certificates;
+            var foundCertificates = storeCertificates
+                .Find(X509FindType.FindBySubjectDistinguishedName, subject, validOnly: false);
 
-                foundCertificate = foundCertificates
-                    .OfType<X509Certificate2>()
-                    .Where(certificate => certificate.NotBefore <= currentTime && certificate.NotAfter > currentTime)
-                    .OrderBy(certificate => certificate.NotAfter)
-                    .FirstOrDefault();
+            foundCertificate = foundCertificates
+                .Where(certificate => certificate.NotBefore <= currentTime && certificate.NotAfter > currentTime)
+                .MinBy(certificate => certificate.NotAfter);
 
-                if (foundCertificate == null) {
-                    throw new InvalidOperationException("Couldn't find a valid certificate with " +
-                                                        $"subject '{subject}' on the '{storeLocation}\\{storeName}'");
-                }
-
-                return foundCertificate;
+            if (foundCertificate == null) {
+                throw new InvalidOperationException("Couldn't find a valid certificate with " +
+                                                    $"subject '{subject}' on the '{storeLocation}\\{storeName}'");
             }
-            finally {
-                DisposeCertificates(storeCertificates, except: foundCertificate);
-            }
+
+            return foundCertificate;
+        }
+        finally {
+            DisposeCertificates(storeCertificates, except: foundCertificate);
         }
     }
 
-    private static void DisposeCertificates(X509Certificate2Collection certificates, X509Certificate2 except) {
-        if (certificates != null) {
-            foreach (var certificate in certificates) {
-                if (!certificate.Equals(except)) {
-                    certificate.Dispose();
-                }
+    private static void DisposeCertificates(X509Certificate2Collection? certificates, X509Certificate2? except) {
+        if (certificates == null) {
+            return;
+        }
+
+        foreach (var certificate in certificates) {
+            if (!certificate.Equals(except)) {
+                certificate.Dispose();
             }
         }
     }
 
     private sealed class RsaKeyParameters {
-        public string D { get; set; }
-        public string Dp { get; set; }
-        public string Dq { get; set; }
-        public string E { get; set; }
-        public string Iq { get; set; }
-        public string M { get; set; }
-        public string P { get; set; }
-        public string Q { get; set; }
+        public string? D { get; set; }
+        public string? Dp { get; set; }
+        public string? Dq { get; set; }
+        public string? E { get; set; }
+        public string? Iq { get; set; }
+        public string? M { get; set; }
+        public string? P { get; set; }
+        public string? Q { get; set; }
 
         public static RsaKeyParameters Create() {
-            using (var rsa = RSA.Create()) {
-                if (rsa is RSACryptoServiceProvider rSaCryptoServiceProvider && rsa.KeySize < 2048) {
-                    rsa.KeySize = 2048;
-                    if (rsa.KeySize < 2048) {
-                        throw new InvalidOperationException(
-                            "We can't generate an RSA key with at least 2048 bits. Key generation is not supported in this system.");
-                    }
+            using var rsa = RSA.Create();
+            if (rsa is RSACryptoServiceProvider && rsa.KeySize < 2048) {
+                rsa.KeySize = 2048;
+                if (rsa.KeySize < 2048) {
+                    throw new InvalidOperationException(
+                        "We can't generate an RSA key with at least 2048 bits. Key generation is not supported in this system.");
                 }
-
-                return GetParameters(rsa);
             }
+
+            return GetParameters(rsa);
         }
 
         public static RsaKeyParameters GetParameters(RSA key) {

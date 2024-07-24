@@ -1,10 +1,8 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
-using System;
 using System.Collections.Specialized;
 using System.Net;
-using System.Threading.Tasks;
 using ApiAuthorization.IdentityServer.Configuration;
 using Duende.IdentityServer.Configuration;
 using Duende.IdentityServer.Endpoints.Results;
@@ -29,7 +27,7 @@ internal sealed class AutoRedirectEndSessionEndpoint(
     : IEndpointHandler {
     private readonly ILogger _logger = logger;
 
-    public async Task<IEndpointResult> ProcessAsync(HttpContext ctx) {
+    public async Task<IEndpointResult?> ProcessAsync(HttpContext ctx) {
         var validtionResult = ValidateRequest(ctx.Request);
         if (validtionResult != null) {
             return validtionResult;
@@ -37,15 +35,27 @@ internal sealed class AutoRedirectEndSessionEndpoint(
 
         var parameters = await GetParametersAsync(ctx.Request);
         var user = await session.GetUserAsync();
-        var result = await requestValidator.ValidateAsync(parameters, user);
+        var result = await requestValidator.ValidateAsync(parameters,
+            user ?? throw new InvalidOperationException("User not found"));
         if (result.IsError) {
             _logger.LogError(LoggerEventIds.EndingSessionFailed, "Error ending session {Error}", result.Error);
             return new RedirectResult(identityServerOptions.Value.UserInteraction.ErrorUrl);
         }
 
-        var client = result.ValidatedRequest?.Client;
-        if (client != null &&
-            client.Properties.TryGetValue(ApplicationProfilesPropertyNames.Profile, out _)) {
+        var dflt = identityServerOptions.Value.UserInteraction.LogoutUrl;
+        var redirectUrl = await GetRedirectUrl() ?? dflt ?? "/";
+
+        return new RedirectResult(redirectUrl);
+
+        async Task<string?> GetRedirectUrl() {
+            if (result.ValidatedRequest is not { Client: { } client }) {
+                return null;
+            }
+
+            if (!client.Properties.TryGetValue(ApplicationProfilesPropertyNames.Profile, out _)) {
+                return null;
+            }
+
             var signInScheme = identityServerOptions.Value.Authentication.CookieAuthenticationScheme;
             if (signInScheme != null) {
                 await ctx.SignOutAsync(signInScheme);
@@ -60,10 +70,8 @@ internal sealed class AutoRedirectEndSessionEndpoint(
                     result.ValidatedRequest.State);
             }
 
-            return new RedirectResult(postLogOutUri);
+            return postLogOutUri;
         }
-
-        return new RedirectResult(identityServerOptions.Value.UserInteraction.LogoutUrl);
     }
 
     private static async Task<NameValueCollection> GetParametersAsync(HttpRequest request) {
@@ -75,7 +83,7 @@ internal sealed class AutoRedirectEndSessionEndpoint(
         return form.AsNameValueCollection();
     }
 
-    private static IEndpointResult ValidateRequest(HttpRequest request) {
+    private static StatusCodeResult? ValidateRequest(HttpRequest request) {
         if (!HttpMethods.IsPost(request.Method) && !HttpMethods.IsGet(request.Method)) {
             return new StatusCodeResult(HttpStatusCode.BadRequest);
         }

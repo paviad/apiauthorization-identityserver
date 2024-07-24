@@ -1,8 +1,6 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
-using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using Duende.IdentityServer.Models;
 using JetBrains.Annotations;
@@ -31,7 +29,7 @@ public class ClientCollection : Collection<Client> {
     /// </summary>
     /// <param name="key">The name of the <see cref="Client" />.</param>
     /// <returns>The <see cref="Client" />.</returns>
-    public Client this[string key] {
+    public Client this[string? key] {
         get {
             for (var i = 0; i < Items.Count; i++) {
                 var candidate = Items[i];

@@ -4,7 +4,7 @@
 namespace ApiAuthorization.IdentityServer.Configuration;
 
 internal sealed class ClientDefinition : ServiceDefinition {
-    public string RedirectUri { get; set; }
-    public string LogoutUri { get; set; }
-    public string ClientSecret { get; set; }
+    public string? RedirectUri { get; set; }
+    public string? LogoutUri { get; set; }
+    public string? ClientSecret { get; set; }
 }

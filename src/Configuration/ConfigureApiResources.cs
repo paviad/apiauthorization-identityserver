@@ -1,8 +1,6 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
-using System;
-using System.Collections.Generic;
 using ApiAuthorization.IdentityServer.Options;
 using Duende.IdentityServer.Models;
 using Microsoft.Extensions.Configuration;
@@ -13,7 +11,7 @@ namespace ApiAuthorization.IdentityServer.Configuration;
 
 internal sealed class ConfigureApiResources(
     IConfiguration configuration,
-    IIdentityServerJwtDescriptor localApiDescriptor,
+    IIdentityServerJwtDescriptor? localApiDescriptor,
     ILogger<ConfigureApiResources> logger)
     : IConfigureOptions<ApiAuthorizationOptions> {
     private const char ScopesSeparator = ' ';
@@ -25,16 +23,12 @@ internal sealed class ConfigureApiResources(
         }
     }
 
-    public static ApiResource GetResource(string name, ResourceDefinition definition) {
-        switch (definition.Profile) {
-            case ApplicationProfiles.Api:
-                return GetApi(name, definition);
-            case ApplicationProfiles.IdentityServerJwt:
-                return GetLocalApi(name, definition);
-            default:
-                throw new InvalidOperationException($"Type '{definition.Profile}' is not supported.");
-        }
-    }
+    public static ApiResource GetResource(string name, ResourceDefinition definition) =>
+        definition.Profile switch {
+            ApplicationProfiles.Api => GetApi(name, definition),
+            ApplicationProfiles.IdentityServerJwt => GetLocalApi(name, definition),
+            _ => throw new InvalidOperationException($"Type '{definition.Profile}' is not supported."),
+        };
 
     internal IEnumerable<ApiResource> GetApiResources() {
         var data = configuration
@@ -72,7 +66,7 @@ internal sealed class ConfigureApiResources(
             .ReplaceScopes(ParseScopes(definition.Scopes) ?? [name])
             .Build();
 
-    private static string[] ParseScopes(string scopes) {
+    private static string[]? ParseScopes(string? scopes) {
         if (scopes == null) {
             return null;
         }
