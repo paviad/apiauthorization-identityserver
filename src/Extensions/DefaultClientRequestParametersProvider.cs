@@ -19,11 +19,15 @@ internal sealed class DefaultClientRequestParametersProvider(
     public IOptions<ApiAuthorizationOptions> Options { get; } = options;
 
     public IDictionary<string, string?> GetClientParameters(HttpContext context, string? clientId) {
+        var awaiter = GetClientParametersAsync(context, clientId);
+        awaiter.Wait();
+        return awaiter.Result;
+    }
+
+    public async Task<IDictionary<string, string?>> GetClientParametersAsync(HttpContext context, string? clientId) {
         var client = Options.Value.Clients[clientId];
         // Deprecated in Identity Server 6.0
-        var authorityAwaiter = issuerNameService.GetCurrentAsync();
-        authorityAwaiter.Wait();
-        var authority = authorityAwaiter.Result; //  .GetIdentityServerIssuerUri();
+        var authority = await issuerNameService.GetCurrentAsync();
         if (!client.Properties.TryGetValue(ApplicationProfilesPropertyNames.Profile, out var type)) {
             throw new InvalidOperationException($"Can't determine the type for the client '{clientId}'");
         }

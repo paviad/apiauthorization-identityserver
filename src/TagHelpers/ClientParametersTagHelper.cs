@@ -32,8 +32,8 @@ public class ClientParametersTagHelper(IClientRequestParametersProvider clientRe
     public ViewContext ViewContext { get; set; } = null!;
 
     /// <inheritdoc />
-    public override void Process(TagHelperContext context, TagHelperOutput output) {
-        var parameters = clientRequestParametersProvider.GetClientParameters(ViewContext.HttpContext, ClientId) ??
+    public override async Task ProcessAsync(TagHelperContext context, TagHelperOutput output) {
+        var parameters = await clientRequestParametersProvider.GetClientParametersAsync(ViewContext.HttpContext, ClientId) ??
                          throw new InvalidOperationException($"Parameters for client '{ClientId}' not found.");
         foreach (var parameter in parameters) {
             output.Attributes.Add("data-" + parameter.Key, parameter.Value);

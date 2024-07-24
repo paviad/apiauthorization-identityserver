@@ -16,4 +16,12 @@ public interface IClientRequestParametersProvider {
     /// <param name="clientId">The client id for the client.</param>
     /// <returns>A <see cref="IDictionary{TKey, TValue}" /> containing the client parameters and their values.</returns>
     IDictionary<string, string?> GetClientParameters(HttpContext context, string? clientId);
+
+    /// <summary>
+    ///     Gets parameter values for the client with client id<paramref name="clientId" />.
+    /// </summary>
+    /// <param name="context">The current <see cref="HttpContext" />.</param>
+    /// <param name="clientId">The client id for the client.</param>
+    /// <returns>A <see cref="IDictionary{TKey, TValue}" /> containing the client parameters and their values.</returns>
+    Task<IDictionary<string, string?>> GetClientParametersAsync(HttpContext context, string? clientId);
 }
