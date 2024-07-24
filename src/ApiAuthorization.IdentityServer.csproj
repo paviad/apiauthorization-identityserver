@@ -1,0 +1,26 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <Description>ASP.NET Core API Authorization package powered by Identity Server.</Description>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <PackageTags>aspnetcore;apiauth;identity</PackageTags>
+    <!-- We are a package that depends on the shared framework, this allows us to
+         avoid errors during restore -->
+    <GenerateErrorForMissingTargetingPacks>false</GenerateErrorForMissingTargetingPacks>
+    <!-- IdentityServer packages are not strong named -->
+    <NoWarn>$(NoWarn);CS8002</NoWarn>
+    <Nullable>disable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Duende.IdentityServer" Version="7.0.5" />
+    <PackageReference Include="Duende.IdentityServer.AspNetIdentity" Version="7.0.5" />
+    <PackageReference Include="Duende.IdentityServer.EntityFramework" Version="7.0.5" />
+    <PackageReference Include="JetBrains.Annotations" Version="2024.2.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.7" />
+    <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="8.0.7" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+  </ItemGroup>
+
+</Project>
