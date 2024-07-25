@@ -1,4 +1,4 @@
-![NuGet Version](https://img.shields.io/nuget/v/ApiAuthorization.IdentityServer)
+[![NuGet Version](https://img.shields.io/nuget/v/ApiAuthorization.IdentityServer)](https://www.nuget.org/packages/ApiAuthorization.IdentityServer/)
 
 # ApiAuthorization.IdentityServer
 
