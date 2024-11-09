@@ -21,7 +21,7 @@
     <AssemblyVersion>$(AssemblyVersion)</AssemblyVersion>
     <FileVersion>$(FileVersion)</FileVersion>
     <ImplicitUsings>enable</ImplicitUsings>
-    <Version>1.1.4</Version>
+    <Version>1.1.5</Version>
   </PropertyGroup>
 
   <ItemGroup>
@@ -32,10 +32,10 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Duende.IdentityServer" Version="7.0.7" />
-    <PackageReference Include="Duende.IdentityServer.AspNetIdentity" Version="7.0.7" />
-    <PackageReference Include="Duende.IdentityServer.EntityFramework" Version="7.0.7" />
-    <PackageReference Include="JetBrains.Annotations" Version="2024.2.0" PrivateAssets="all" />
+    <PackageReference Include="Duende.IdentityServer" Version="7.0.8" />
+    <PackageReference Include="Duende.IdentityServer.AspNetIdentity" Version="7.0.8" />
+    <PackageReference Include="Duende.IdentityServer.EntityFramework" Version="7.0.8" />
+    <PackageReference Include="JetBrains.Annotations" Version="2024.3.0" PrivateAssets="all" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.10" />
     <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="8.0.10" />
   </ItemGroup>
